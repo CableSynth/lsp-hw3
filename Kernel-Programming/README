@@ -1,0 +1,31 @@
+This directory provides some resources for developing your familiarity with
+kernel modules and their development.  Most of the resources C code is from
+Linux Kernel Development by Robert Love and/or Linux Device Drivers, 3rd Ed,
+by Jonathan Corbet, Alessandro Rubini, and Greg Kroah-Hartman.
+
+The resources in this directory include:
+  Hello-World-Modules:
+    Two simple kernel modules with their makefiles.  NOTE:  root priviledges
+    are required to compile and install these modules; therefore, it is
+    most suitable that you copy these programs to your LFS machine for
+    experimentation.
+
+  Character-Devices:
+    A directory containing the template code for HW4 in four sub-diretories
+      1. Scull-Modified-For-HW4: a stripped-down version of the scull character
+         driver from LDD chapter 3.
+      2. PWD-Vault: code to implement the password vault data structure (i., the
+         replacement data structure for the original scull qset and quantum.
+      3. Test-Programs: programs provided to the students to help them test
+         their implementation of HW4.
+      4. Scull-Original:  the original (working) scull driver.  Students need
+         NOT concern themselves with this code for HW4.  It is merely provided
+         as a historical reference.
+
+  Net-Filters:
+    A directory containing the template code for HW5
+
+  .:
+    randGen:  a sript to demonstrate accessing a parameter of /dev/random
+              via the /proc file system hierarchy.
+

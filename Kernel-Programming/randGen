@@ -1,0 +1,5 @@
+#!/bin/bash
+num=`cat /proc/sys/kernel/random/uuid | tr '[:lower:]' '[:upper:]' | \
+                sed -e 's/-.*//' -e 's/^/ibase=16;/' | bc`
+echo $num $1
+echo "$num%$1" | bc

@@ -1,0 +1,4 @@
+#!/bin/sh
+cp Scull-Files/scull.c hw4_mod.c
+echo "Now edit hw4_mod.c according the directions in TODO"
+#vi hw4_mod.c

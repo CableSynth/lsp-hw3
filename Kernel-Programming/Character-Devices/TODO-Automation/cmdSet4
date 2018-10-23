@@ -1,0 +1,5 @@
+#!/bin/sh
+make
+sudo ./hw4mod_load 
+sudo ./hw4mod_unload 
+dmesg | grep hw4mod

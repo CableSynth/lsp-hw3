@@ -1,0 +1,6 @@
+#!/bin/sh
+mkdir Scull-Files
+scp shomperk@john.cedarville.edu:"~shomperk/CS3320/Public/Kernel-Programming/Character-Devices/HW4-Files/*" .
+scp shomperk@john.cedarville.edu:"~shomperk/CS3320/Public/Kernel-Programming/Character-Devices/PWD-Vault/*" .
+scp shomperk@john.cedarville.edu:"~shomperk/CS3320/Public/Kernel-Programming/Character-Devices/Test-Programs/*" .
+scp shomperk@john.cedarville.edu:"~shomperk/CS3320/Public/Kernel-Programming/Character-Devices/Scull-Modified-For-HW4/*" Scull-Files

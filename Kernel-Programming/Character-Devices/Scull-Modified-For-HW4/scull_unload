@@ -1,0 +1,12 @@
+#!/bin/sh
+# $Id: scull_load,v 1.4 2004/11/03 06:19:49 rubini Exp $
+# Modified 10/27/2017 by K Shomper
+module="scull"
+device="scull"
+
+# invoke rmmod with all arguments we got
+/sbin/rmmod $module $* || exit 1
+
+# Remove stale nodes
+rm -vf /dev/${device} /dev/${device}0 
+

@@ -1,0 +1,94 @@
+TODO:
+cmdSet1:
+- Make a working directory on your LFS machine for HW4
+- Make a sub-directory in the working directory for the scull files
+- Copy files in directories HW4-Files, PWD-Vault, and Test-Programs to your 
+  working directory, for example, to copy the HW4-Files from john to your
+  machine use one of the following commands:
+    from the lfs machine use:
+      scp username@john.cedarville.edu:"~shomperk/CS3320/.../HW4-Files/*" .
+    from john use:  
+      scp ~shomperk/CS3320/.../ HW4-Files/* username@ip_addr_of_lfs_machine:"~"
+- Copy the scull files in Scull-Modified-For-HW4 to your working SUBDIRECTORY
+  using a variant of one of the scp commands above
+
+cmdSet2:
+- Test your scull driver in the working SUBDIRECTORY by 
+   (1) building the scull.ko driver module with make, 
+   (2) loading the module with scull_load, 
+   (3) executing the write test with command: echo "This is a test" > /dev/scull
+   (4) executing the read test with command:  cat > /dev/scull
+   (5) unloading your module with scull_unload.  
+   (6) test that the scull module loaded and unloaded with the command:
+       "dmesg | grep scull"
+  IMPORTANT:  If these tests do NOT work, DO NOT PROCEED.  Get help from your 
+  classmates or instructor to fix your setup FIRST, test the setup, and then 
+  proceed only after it is correct
+
+cmdSet3 and your own work:
+- Copy the scull C source file in the SUBDIRECTORY to your working directory:
+  -- e.g., cp SUBDIRECTORY/scull.c ./hw4_mod.c
+  -- NOTE:  you do NOT need to copy the scull.h file, because I have provided
+            hw4_mod.h for you in HW4-Files
+- Prepare your kernel module by doing the following:
+  -- Replace the inclusion of "scull.h" with "hw4_mod.h"
+  -- Remove the trim() and follow() functions from hw4_mod.c
+  -- Stub* functions open(), read(), write(), release(), llseek(), and ioctl()
+     --- *NOTE: keep lines with "container_of, "private_data", "down", and "up",
+          and pay attention to return codes
+  -- Modify hw4_mod.c to replace all references to "scull" with "hw4mod"
+  -- Modify hw4_mod.c to replace all references to "SCULL" with "HW4MOD"
+  -- Modify init_module()
+     --- In the section labeled /* Initialize each device */ remove the lines
+         referencing "quantum" and "qset" and replace them with the line
+           initialize_vault(&hw4mod_devices[i].pwd_vault, 
+                            HW4MOD_MAX_USERS_IN_VAULT);
+  -- Modify clean_up_module()
+     --- In the section labeled /* Get rid of our char ... */ remove the lines
+         referencing the trim() function and replace them with the line
+         finalize_vault(&(hw4mod_devices+i)->pwd_vault);
+  -- Strip any remaining references to qset or quantum out of hw4_mod.c
+
+cmdSet4:
+- Re-test your development environment by
+   (1) building the hw4mod.ko driver module with make, 
+       NOTE:  You will get several warning from unused variables because of the
+       stubs and a few other miscellaneous warnings, but if you followed the
+       modification steps carefully, your make command should build hw4mod.ko
+   (2) loading the module with hw4mod_load, 
+   (3) unloading your module with hw4mod_unload.  
+   (4) running the command "dmesg | grep hw4mod" and confirming that the last 
+       messages in the kernel log are:
+           hw4mod device setup
+           hw4mod loaded
+           hw4mod unloaded
+
+Setup is complete, now complete the assignment (see HW write-up for help):
+- Create the remainder of the hw4mod functions as outlined below:
+  -- Modify**, in this order, open(), release(), write(), read(), ioctl(), and
+     llseek() to work with the new structures
+     --- **NOTE:  your new open(), read(), etc, functions are dependent on the
+           calling user's uid to index into the password vault.  Use the code
+             "get_current_user()->uid.val
+           to obtain the uid
+     --- **NOTE:  the uid obtained above is not sufficient for indexing the 
+           password vault, but needs modification to fit between 1-20.
+     --- **NOTE:  work on one function at a time and test the function with the
+           instructor-provided test programs immediately after completing a
+           replacement function, e.g., use openVault.c to test your
+           implementation of open() immediately on completing that function
+           --- The test procedure looks like the following:
+                (1) Compile the kernel module: 
+                      make KFLAGS="-Wno-format -Wno-declaration-after-statement"
+                (2) Unload any earlier version of the module
+                    sudo ./ hw4mod_unload
+                (3) Clear the kernel logs:
+                      sudo dmesg --clear
+                (4) Load your current version of the module
+                      sudo ./hw4mod_load
+                (5) Execute your test programs
+                      e.g., ./openVault
+                (6) Examine any log messages for errors or confirmation of
+                    correct operation
+                      dmesg
+  -- You are finished when you pass all six test programs successfully

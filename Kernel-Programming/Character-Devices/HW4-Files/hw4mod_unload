@@ -1,0 +1,11 @@
+#!/bin/sh
+module="hw4mod"
+device="hw4mod"
+
+# invoke rmmod with all arguments we got
+/sbin/rmmod $module $* || exit 1
+
+# Remove stale nodes
+
+rm -vf /dev/${device} /dev/${device}0 
+
