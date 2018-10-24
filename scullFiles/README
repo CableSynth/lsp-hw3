@@ -1,0 +1,19 @@
+The scull code in LDD3 is too old to run on modern linux kernels.  However the
+authors have managed to keep the code updated on GitHub at:
+  https://github.com/martinezjavier/ldd3.
+
+The entire source repository was downloaded as a zip, unzipped it on john, then
+the first of the scull examples (the one from Chapter 3) wa moded to the LFS
+machine for modification.
+
+To make the scull source more easiy understood for CS3320, the instructor 
+removed references to debugging information and additional devices (e.g., 
+scullpipe, sculla, etc.), thoroughly commented the code, and improved the 
+formatting.
+
+He also simpified the Makefile to be more like the one from the hello world 
+example.
+
+What now remains is a simplified version of scull which should be modified
+to implement HW4.
+

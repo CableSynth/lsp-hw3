@@ -1,0 +1,27 @@
+#!/bin/sh
+# $Id: scull_load,v 1.4 2004/11/03 06:19:49 rubini Exp $
+# Modified 10/27/2017 by K Shomper
+module="scull"
+device="scull"
+mode="664"
+
+# Group: distributions do it differently, on the LFS machines use group "adm"
+group="adm"
+
+# invoke insmod with all arguments we got
+# and use a pathname, as insmod doesn't look in . by default
+/sbin/insmod ./$module.ko $* || exit 1
+
+# retrieve major number
+major=$(awk "\$2==\"$module\" {print \$1}" /proc/devices)
+echo $major
+
+# Remove stale nodes and replace them, then give gid and perms
+# Usually the script is shorter, it's scull that has several devices in it.
+rm -vf /dev/${device}0
+mknod /dev/${device}0 c $major 0
+ln -svf ${device}0 /dev/${device}
+
+chgrp -v $group /dev/${device}0 
+chmod -v $mode  /dev/${device}0
+

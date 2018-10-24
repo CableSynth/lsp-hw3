@@ -1,0 +1,1 @@
+cmd_/home/dabaum/Working/LSP/hw3/scullFiles/scull.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds  --build-id  -o /home/dabaum/Working/LSP/hw3/scullFiles/scull.ko /home/dabaum/Working/LSP/hw3/scullFiles/scull.o /home/dabaum/Working/LSP/hw3/scullFiles/scull.mod.o ;  true
