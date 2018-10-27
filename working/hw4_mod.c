@@ -33,7 +33,7 @@
 #include <linux/uaccess.h> /* needed for some reason*/
 #include <asm/uaccess.h>   /* copy_*_user */
 
-#include "scull.h"         /* local definitions */
+#include "hw4_mod.h"         /* local definitions */
 
 /*
  * Our parameters which can be set at load time.
@@ -55,45 +55,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 /* the set of devices allocated in scull_init_module */
 struct scull_dev *scull_devices = NULL;
-
-/*
- * Trim:  Release memory held by scull device; must be called with the device
- *        semaphore held.  Requires that dev not be NULL
- */
-static int scull_trim(struct scull_dev *dev) {
-   struct scull_qset *next, *dptr;
-   int qset = dev->qset;
-   int i;
-
-   /* release all the list items */
-   for (dptr = dev->data; dptr; dptr = next) {
-
-      /* if list item has associated quantums, release memory for those also */
-      if (dptr->data) {
-
-         /* walk qset, releasing each */
-         for (i = 0; i < qset; i++) {
-            kfree(dptr->data[i]);
-         }
-
-         /* then release array of pointers to the quantums and NULL terminate */
-         kfree(dptr->data);
-         dptr->data = NULL;
-      }
-
-      /* advance to next item in list */
-      next = dptr->next;
-      kfree(dptr);
-   }
-
-   /* set the dev fields to initial values */
-   dev->size    = 0;
-   dev->quantum = scull_quantum;
-   dev->qset    = scull_qset;
-   dev->data    = NULL;
-
-   return 0;
-}
 
 /*
  * Open: to open the device is to initialize it for the remaining methods.
@@ -118,16 +79,12 @@ int scull_open(struct inode *inode, struct file *filp) {
    filp->private_data = dev;
 
    /* now trim to 0 the length of the device if open was write-only */
-   if ( (filp->f_flags & O_ACCMODE) == O_WRONLY) {
 
-      /* grab the semaphore, so the call to trim() is atomic */
-      if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
+   /* grab the semaphore, so the call to trim() is atomic */
+   if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
 
-      scull_trim(dev);
-
-      /* release the semaphore */
-      up(&dev->sem);
-   }
+   /* release the semaphore */
+   up(&dev->sem);
 
    return 0;
 }
@@ -142,53 +99,6 @@ int scull_release(struct inode *inode, struct file *filp) {
    return 0;
 }
 
-/*
- * Scull_Follow: used by scull_read() and scull_write() to find the item in 
- *               the list that corresponds to the file's  "file position" 
- *               pointer.  If file position is beyond end of the file, then add 
- *               items to extend the file, typical of file-oriented behavior.
- */
-static struct scull_qset *scull_follow(struct scull_dev *dev, int n) {
-
-   /* get the first item in the list */
-   struct scull_qset *qs = dev->data;
-
-   /* allocate first qset explicitly if need be */
-   if (qs == NULL) {
-
-      /* allocate and also set the data field to rference this item */
-      qs = dev->data = kmalloc(sizeof(struct scull_qset), GFP_KERNEL);
-
-      /* if the allocation fails, return NULL */
-      if (qs == NULL) return NULL;
-
-      /* initialize the qset to all zeros */
-      memset(qs, 0, sizeof(struct scull_qset));
-   }
-
-   /* follow the list to item n */
-   while (n--) {
-
-      /* if there is no next item in the list, allocate one */
-      if (qs->next == NULL) {
-
-         /* allocate and return NULL on failure as before */
-         qs->next = kmalloc(sizeof(struct scull_qset), GFP_KERNEL);
-         if (qs->next == NULL) return NULL;
-
-         /* or zero the memory */
-         memset(qs->next, 0, sizeof(struct scull_qset));
-      }
-
-      /* advance to next item */
-      qs = qs->next;
-
-      /* curious -- continue; */
-   }
-
-   /* return the qset associated with the n-th item */
-   return qs;
-}
 
 /*
  * Read: implements the read action on the device by reading count
@@ -201,12 +111,6 @@ ssize_t scull_read(struct file *filp, char __user *buf, size_t count,
                     loff_t *f_pos) {
 
    struct scull_dev  *dev  = filp->private_data; 
-   struct scull_qset *dptr;
-
-   int     quantum  = dev->quantum;
-   int     qset     = dev->qset;
-   int     itemsize = quantum * qset; /* number of bytes in the list item    */
-   int     item, s_pos, q_pos, rest;  /* other variables for calculating pos */
    ssize_t retval   = 0;
 
    /* acquire the semaphore */
@@ -217,47 +121,7 @@ ssize_t scull_read(struct file *filp, char __user *buf, size_t count,
     * semaphore, "goto out" provides a single exit point that allows for
     * releasing the semaphore.
     */
-   if (*f_pos >= dev->size) goto out;
 
-   if (*f_pos + count > dev->size) {
-      count = dev->size - *f_pos;
-   }
-
-   /* find listitem, qset index, and offset in the quantum */
-   item = (long)*f_pos / itemsize;
-   rest = (long)*f_pos % itemsize;
-   s_pos = rest / quantum; q_pos = rest % quantum;
-
-   /* follow the list up to the right position (defined elsewhere) */
-   dptr = scull_follow(dev, item);
-
-   if (dptr == NULL || !dptr->data || ! dptr->data[s_pos])
-      goto out; /* don't fill holes */
-
-   /* read only up to the end of this quantum */
-   if (count > quantum - q_pos) {
-      count = quantum - q_pos;
-   }
-
-   /* this is where the actual "read" occurs, when we copy from the
-    * in-memory data into the user-supplied buffer.  This copy is
-    * handled by the copy_to_user() function, which handles the
-    * transfer of data from kernel space data structures to user space
-    * data structures.
-    */
-   if (copy_to_user(buf, dptr->data[s_pos] + q_pos, count)) {
-      retval = -EFAULT;
-      goto out;
-   }
-
-   /* on successful copy, update the file position and return the number
-    * of bytes read.
-    */
-   *f_pos += count;
-   retval = count;
-
-   /* release the semaphore and return */
-  out:
    up(&dev->sem);
    return retval;
 }
@@ -272,76 +136,10 @@ ssize_t scull_write(struct file *filp, const char __user *buf, size_t count,
                      loff_t *f_pos) {
 
    struct scull_dev  *dev  = filp->private_data;
-   struct scull_qset *dptr;
-
-   int     quantum  = dev->quantum;
-   int     qset     = dev->qset;
-   int     itemsize = quantum * qset;
-   int     item, s_pos, q_pos, rest;
    ssize_t retval   = -ENOMEM;         /* value used in "goto out" statements */
 
-   /* acquire the semaphore */
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
 
-   /* find list item, qset index and offset in the quantum */
-   item = (long)*f_pos / itemsize;
-   rest = (long)*f_pos % itemsize;
-   s_pos = rest / quantum; q_pos = rest % quantum;
-
-   /* follow the list up to the right position */
-   dptr = scull_follow(dev, item);
-
-   /* if there is no item at this file position, then exit */
-   if (dptr == NULL) goto out;
-
-   /* if there is memory for writing data in this item, allocate some */
-   if (!dptr->data) {
-
-      /* exit if the allocation fails */
-      dptr->data = kmalloc(qset * sizeof(char *), GFP_KERNEL);
-      if (!dptr->data) goto out;
-
-      /* otherwise zero the memory */
-      memset(dptr->data, 0, qset * sizeof(char *));
-   }
-
-   /* if there is no memory for writing data in this quantum, allocate some */
-   if (!dptr->data[s_pos]) {
-
-      /* exit if the allocation fails */
-      dptr->data[s_pos] = kmalloc(quantum, GFP_KERNEL);
-      if (!dptr->data[s_pos]) goto out;
-   }
-
-   /* adjust count to write only up to the end of this quantum */
-   if (count > quantum - q_pos) {
-      count = quantum - q_pos;
-   }
-
-   /* this is where the actual "write" occurs, when we copy from the
-    * the user-supplied buffer into the in-memory data area.  This copy is
-    * handled by the copy_from_user() function, which handles the
-    * transfer of data from user space data structures to kernel space
-    * data structures.
-    */
-   if (copy_from_user(dptr->data[s_pos]+q_pos, buf, count)) {
-      retval = -EFAULT;
-      goto out;
-   }
-
-   /* on successful transfer, update the file position and record the
-    * number of bytes written.
-    */
-   *f_pos += count;
-   retval = count;
-
-   /* update the size of the file */
-   if (dev->size < *f_pos) {
-      dev->size = *f_pos;
-   }
-
-   /* release the semaphore and return */
-  out:
    up(&dev->sem);
    return retval;
 }
