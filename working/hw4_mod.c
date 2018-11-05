@@ -41,14 +41,10 @@
 int hw4mod_major   = HW4MOD_MAJOR;
 int hw4mod_minor   = 0;
 int hw4mod_nr_devs = HW4MOD_NR_DEVS;
-int hw4mod_quantum = HW4MOD_QUANTUM;
-int hw4mod_qset    = HW4MOD_QSET;
 
 module_param(hw4mod_major,   int, S_IRUGO);
 module_param(hw4mod_minor,   int, S_IRUGO);
 module_param(hw4mod_nr_devs, int, S_IRUGO);
-module_param(hw4mod_quantum, int, S_IRUGO);
-module_param(hw4mod_qset,    int, S_IRUGO);
 
 MODULE_AUTHOR("Alessandro Rubini, Jonathan Corbet modified K. Shomper");
 MODULE_LICENSE("Dual BSD/GPL");
@@ -60,6 +56,8 @@ struct hw4mod_dev *hw4mod_devices = NULL;
  * Open: to open the device is to initialize it for the remaining methods.
  */
 int hw4mod_open(struct inode *inode, struct file *filp) {
+
+  int uid = get_current_user()->uid.val
 
    /* the device this function is handling (one of the hw4mod_devices) */
    struct hw4mod_dev *dev;
@@ -162,19 +160,6 @@ long hw4mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
     * "write" is reversed
     */
 
-   /* parse the incoming command */
-   switch(cmd) {
-
-     case HW4MOD_IOCSQSET:
-        if (! capable (CAP_SYS_ADMIN))
-           return -EPERM;
-        retval = __get_user(hw4mod_qset, (int __user *)arg);
-        break;
-
-     /* redundant, as cmd was checked against MAXNR */
-     default:
-        return -ENOTTY;
-   }
 
    return retval;
 }
@@ -197,10 +182,6 @@ loff_t hw4mod_llseek(struct file *filp, loff_t off, int whence) {
 
      case 1: /* SEEK_CUR */
       newpos = filp->f_pos + off;
-      break;
-
-     case 2: /* SEEK_END */
-      newpos = dev->size + off;
       break;
 
      default: /* can't happen */
