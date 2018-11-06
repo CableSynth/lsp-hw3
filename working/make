@@ -1,1 +1,11 @@
 #!/bin/bash
+
+make KFLAGS="-Wno-format -Wno-declaration-after-statement"
+
+sudo dmesg --clear
+
+sudo ./hw4mod_unload
+
+sudo ./hw4mod_load
+
+dmesg
