@@ -32,6 +32,7 @@
 
 #include <linux/uaccess.h> /* needed for some reason*/
 #include <asm/uaccess.h>   /* copy_*_user */
+#include <linux/sched.h>
 
 #include "hw4_mod.h"         /* local definitions */
 
@@ -57,7 +58,8 @@ struct hw4mod_dev *hw4mod_devices = NULL;
  */
 int hw4mod_open(struct inode *inode, struct file *filp) {
 
-  int uid = get_current_user()->uid.val
+   int uid = get_current_user()->uid.val;
+   uid -= 1000;
 
    /* the device this function is handling (one of the hw4mod_devices) */
    struct hw4mod_dev *dev;
@@ -76,10 +78,16 @@ int hw4mod_open(struct inode *inode, struct file *filp) {
     */
    filp->private_data = dev;
 
-   /* now trim to 0 the length of the device if open was write-only */
-
    /* grab the semaphore, so the call to trim() is atomic */
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
+
+   dev->pwd_vault.uhpw_data[uid].data;
+   
+   if(dev->pwd_vault.uhpw_data[uid].num_hints > 0){
+     dev->pwd_vault.uhpw_data[uid].fp = dev->pwd_vault.uhpw_data[uid].data[0];
+   } else {
+     dev->pwd_vault.uhpw_data[uid].fp = NULL;
+   }
 
    /* release the semaphore */
    up(&dev->sem);
@@ -119,6 +127,11 @@ ssize_t hw4mod_read(struct file *filp, char __user *buf, size_t count,
     * semaphore, "goto out" provides a single exit point that allows for
     * releasing the semaphore.
     */
+   hpw_list *filePtr = dev->pwd_vault.uhpw_data->fp;
+
+   if(filePtr != NULL){
+     
+   }
 
    up(&dev->sem);
    return retval;
@@ -137,6 +150,12 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
    ssize_t retval   = -ENOMEM;         /* value used in "goto out" statements */
 
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
+
+   if(count == 0){
+     printk("<3> Empty string");
+   }else{
+     printk("<3> Not Empty Buf");
+   }
 
    up(&dev->sem);
    return retval;
@@ -316,6 +335,7 @@ int hw4mod_init_module(void) {
    hw4mod_cleanup_module();
    return result;
 }
+
 
 /* identify to the kernel the entry points for initialization and release, these
  * functions are called on insmod and rmmod, respectively
