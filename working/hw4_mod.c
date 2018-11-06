@@ -151,8 +151,6 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
 
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
 
-    printk("%s", buf);
-    printk("%i", count);
    if(count == 0){
      printk("<3> Empty string");
    }else{
