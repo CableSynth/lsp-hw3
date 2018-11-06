@@ -127,7 +127,7 @@ ssize_t hw4mod_read(struct file *filp, char __user *buf, size_t count,
     * semaphore, "goto out" provides a single exit point that allows for
     * releasing the semaphore.
     */
-   hpw_list *filePtr = dev->pwd_vault.uhpw_data->fp;
+   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data->fp;
 
    if(filePtr != NULL){
      
@@ -151,6 +151,8 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
 
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
 
+    printk("%s", buf);
+    printk("%i", count);
    if(count == 0){
      printk("<3> Empty string");
    }else{
