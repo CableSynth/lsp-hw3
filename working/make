@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make KFLAGS="-Wno-format -Wno-declaration-after-statement"
+make KFLAGS="-Wno-format -Wno-declaration-after-statement -std=c11" CFLAGS="-std=c99"
 
 sudo dmesg --clear
 
