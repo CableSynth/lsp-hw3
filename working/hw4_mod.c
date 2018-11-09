@@ -237,7 +237,7 @@ loff_t hw4mod_llseek(struct file *filp, loff_t off, int whence) {
 
    dev->pwd_vault.uhpw_data[uid-1].fp = find_hint (&dev->pwd_vault, uid, dev->pwd_vault.uhpw_data[uid-1].seek_hint, &pos);
 
-   return (loff_t) 0;
+   return (loff_t) pos;
 }
 
 /* this assignment is what "binds" the template file operations with those that
