@@ -209,7 +209,7 @@ long hw4mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
     * "write" is reversed
     */
 
-    // if(cmd == HW4MOD_IOCSKEY){
+    // if(cmd == HW4MOD_IOCSQUANTUM){
     //   if (! capable (CAP_SYS_ADMIN))
     //       return -EPERM;
     //   retval = __get_user(scull_quantum, (int __user *)arg);
@@ -230,25 +230,14 @@ long hw4mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 loff_t hw4mod_llseek(struct file *filp, loff_t off, int whence) {
 
    struct hw4mod_dev *dev    = filp->private_data;
-   loff_t            newpos;
+   int pos;
 
-   /* reset the file position as is standard */
-   switch(whence) {
-     case 0: /* SEEK_SET */
-      newpos = off;
-      break;
+   int uid = get_current_user()->uid.val;
+   uid -= 999;
 
-     case 1: /* SEEK_CUR */
-      newpos = filp->f_pos + off;
-      break;
+   dev->pwd_vault.uhpw_data[uid-1].fp = find_hint (&dev->pwd_vault, uid, dev->pwd_vault.uhpw_data[uid-1].seek_hint, &pos);
 
-     default: /* can't happen */
-      return -EINVAL;
-   }
-
-   /* set the postion and return */
-   filp->f_pos = newpos;
-   return newpos;
+   return (loff_t) 0;
 }
 
 /* this assignment is what "binds" the template file operations with those that
