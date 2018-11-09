@@ -152,15 +152,22 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
    
    int uid = get_current_user()->uid.val;
    uid -= 999;
-   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data[uid].fp;
+   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data[uid-1].fp;
    
-   char *hint, *password;
+   char *hint, *password, *temp;
    
    if(strcmp(buf, "") == 0){
      printk(KERN_WARNING "<3> Empty string\n");
-     
      dump_vault (&dev->pwd_vault, FORWARD);
-     delete_from_list(&dev->pwd_vault.uhpw_data->fp);
+     //delete_from_list(&dev->pwd_vault.uhpw_data->fp);
+     if(filePtr != NULL){
+       struct hpw_list *next_Ptr = filePtr->next;
+       hint = filePtr->hpw.hint;
+       password = filePtr->hpw.pwd;
+       delete_pair(&dev->pwd_vault, uid, hint, password);
+     }
+     struct hpw_list *next_Ptr = filePtr->next;
+     
      dump_vault (&dev->pwd_vault, FORWARD);
 
      //here we need to delete a pair and move fp
@@ -174,7 +181,16 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
 
      insert_pair (&dev->pwd_vault, uid, hint, password);
      dump_vault (&dev->pwd_vault, FORWARD);
-     insert_pair (&dev->pwd_vault, uid, "old", "new");
+     //sscanf(buf, "%s %s", hint, password);
+     password = strchr(buf, ' ');
+     password++;
+     printk(KERN_WARNING "password: %s\n", password);
+     hint = buf;
+     char * tmp = password;
+     tmp[-1] = '\0';
+     insert_pair (&dev->pwd_vault, uid, hint, password);
+     dump_vault (&dev->pwd_vault, FORWARD);
+     insert_pair (&dev->pwd_vault, uid, "hint", "new");
      dump_vault (&dev->pwd_vault, FORWARD);
 
    }
@@ -200,6 +216,14 @@ long hw4mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
     * access_ok is kernel-oriented, so the concept of "read" and
     * "write" is reversed
     */
+
+    if(cmd == SCULL_IOCSQUANTUM){
+      if (! capable (CAP_SYS_ADMIN))
+          return -EPERM;
+      retval = __get_user(scull_quantum, (int __user *)arg);
+    }
+
+      /* Tell: arg is the value */
 
 
    return retval;

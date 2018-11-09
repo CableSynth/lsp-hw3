@@ -6,6 +6,8 @@
 #include <linux/string.h>     /* for memset*/
 #include "pwd_vault.h"
 
+//#define DEBUG 1
+
 /* initialize_vault:  initializes the pwd vault */
 int  initialize_vault (struct pwd_vault *v, int size) {
 
