@@ -176,7 +176,6 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
      }
      struct hpw_list *next_Ptr = filePtr->next;
 
-     //here we need to delete a pair and move fp
    }else {
      password = strchr(buf, ' ');
      password++;
@@ -209,12 +208,17 @@ long hw4mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
     * "write" is reversed
     */
 
-    // if(cmd == HW4MOD_IOCSQUANTUM){
-    //   if (! capable (CAP_SYS_ADMIN))
-    //       return -EPERM;
-    //   retval = __get_user(scull_quantum, (int __user *)arg);
+     if(cmd == HW4MOD_IOCGKEY){
+       if (! capable (CAP_SYS_ADMIN))
+           return -EPERM;
+       struct hw4mod_dev  *dev  = filp->private_data;
+       int uid = get_current_user()->uid.val;
+       uid -= 999;
+
+       copy_from_user(dev->pwd_vault.uhpw_data[uid].seek_hint, arg, strlen(arg));
+       
       
-    // }
+    }
 
       /* Tell: arg is the value */
 

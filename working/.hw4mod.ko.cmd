@@ -1,1 +1,1 @@
-cmd_/home/user/Working/hw3/working/hw4mod.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/user/Working/hw3/working/hw4mod.ko /home/user/Working/hw3/working/hw4mod.o /home/user/Working/hw3/working/hw4mod.mod.o ;  true
+cmd_/home/user/Working/lsp-hw3/working/hw4mod.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/user/Working/lsp-hw3/working/hw4mod.ko /home/user/Working/lsp-hw3/working/hw4mod.o /home/user/Working/lsp-hw3/working/hw4mod.mod.o ;  true

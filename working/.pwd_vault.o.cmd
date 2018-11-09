@@ -1,8 +1,8 @@
-cmd_/home/user/Working/hw3/working/pwd_vault.o := gcc -Wp,-MD,/home/user/Working/hw3/working/.pwd_vault.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/5/include  -I./arch/x86/include -I./arch/x86/include/generated  -I./include -I./arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -fno-PIE -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m32 -msoft-float -mregparm=3 -freg-struct-return -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -Wa,-mtune=generic32 -ffreestanding -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_AVX512=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mindirect-branch=thunk-extern -mindirect-branch-register -DRETPOLINE -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -DCC_HAVE_ASM_GOTO -Wframe-larger-than=1024 -fstack-protector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fno-merge-all-constants -fmerge-constants -fno-stack-check -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init  -DMODULE  -DKBUILD_BASENAME='"pwd_vault"'  -DKBUILD_MODNAME='"hw4mod"' -c -o /home/user/Working/hw3/working/pwd_vault.o /home/user/Working/hw3/working/pwd_vault.c
+cmd_/home/user/Working/lsp-hw3/working/pwd_vault.o := gcc -Wp,-MD,/home/user/Working/lsp-hw3/working/.pwd_vault.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/5/include  -I./arch/x86/include -I./arch/x86/include/generated  -I./include -I./arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -fno-PIE -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -m32 -msoft-float -mregparm=3 -freg-struct-return -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -Wa,-mtune=generic32 -ffreestanding -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_SSSE3=1 -DCONFIG_AS_CRC32=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_AVX512=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mindirect-branch=thunk-extern -mindirect-branch-register -DRETPOLINE -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -DCC_HAVE_ASM_GOTO -Wframe-larger-than=1024 -fstack-protector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -pg -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fno-merge-all-constants -fmerge-constants -fno-stack-check -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init  -DMODULE  -DKBUILD_BASENAME='"pwd_vault"'  -DKBUILD_MODNAME='"hw4mod"' -c -o /home/user/Working/lsp-hw3/working/pwd_vault.o /home/user/Working/lsp-hw3/working/pwd_vault.c
 
-source_/home/user/Working/hw3/working/pwd_vault.o := /home/user/Working/hw3/working/pwd_vault.c
+source_/home/user/Working/lsp-hw3/working/pwd_vault.o := /home/user/Working/lsp-hw3/working/pwd_vault.c
 
-deps_/home/user/Working/hw3/working/pwd_vault.o := \
+deps_/home/user/Working/lsp-hw3/working/pwd_vault.o := \
   include/linux/compiler_types.h \
     $(wildcard include/config/enable/must/check.h) \
     $(wildcard include/config/enable/warn/deprecated.h) \
@@ -565,8 +565,8 @@ deps_/home/user/Working/hw3/working/pwd_vault.o := \
     $(wildcard include/config/need/per/cpu/page/first/chunk.h) \
   include/linux/kmemleak.h \
   include/linux/kasan.h \
-  /home/user/Working/hw3/working/pwd_vault.h \
+  /home/user/Working/lsp-hw3/working/pwd_vault.h \
 
-/home/user/Working/hw3/working/pwd_vault.o: $(deps_/home/user/Working/hw3/working/pwd_vault.o)
+/home/user/Working/lsp-hw3/working/pwd_vault.o: $(deps_/home/user/Working/lsp-hw3/working/pwd_vault.o)
 
-$(deps_/home/user/Working/hw3/working/pwd_vault.o):
+$(deps_/home/user/Working/lsp-hw3/working/pwd_vault.o):
