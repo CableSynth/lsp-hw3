@@ -117,6 +117,9 @@ ssize_t hw4mod_read(struct file *filp, char __user *buf, size_t count,
 
    struct hw4mod_dev  *dev  = filp->private_data; 
    ssize_t retval   = 0;
+   char readBuf[80];
+   int uid = get_current_user()->uid.val;
+   uid -= 999;
 
    /* acquire the semaphore */
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
@@ -126,10 +129,18 @@ ssize_t hw4mod_read(struct file *filp, char __user *buf, size_t count,
     * semaphore, "goto out" provides a single exit point that allows for
     * releasing the semaphore.
     */
-   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data->fp;
+
+   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data[uid-1].fp;
 
    if(filePtr != NULL){
-     
+     buf[0] = '\0';
+     strcat(buf, filePtr->hpw.hint);
+     strcat(buf, " ");
+     strcat(buf, filePtr->hpw.pwd);
+
+     dev->pwd_vault.uhpw_data[uid-1].fp = next_hint(&dev->pwd_vault, uid, dev->pwd_vault.uhpw_data[uid-1].fp);
+
+     retval = 1;
    }
 
    up(&dev->sem);
@@ -157,9 +168,6 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
    char *hint, *password, *temp;
    
    if(strcmp(buf, "") == 0){
-     printk(KERN_WARNING "<3> Empty string\n");
-     dump_vault (&dev->pwd_vault, FORWARD);
-     //delete_from_list(&dev->pwd_vault.uhpw_data->fp);
      if(filePtr != NULL){
        struct hpw_list *next_Ptr = filePtr->next;
        hint = filePtr->hpw.hint;
@@ -167,31 +175,15 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
        delete_pair(&dev->pwd_vault, uid, hint, password);
      }
      struct hpw_list *next_Ptr = filePtr->next;
-     
-     dump_vault (&dev->pwd_vault, FORWARD);
 
      //here we need to delete a pair and move fp
    }else {
-     printk(KERN_WARNING "<3> Not Empty Buf\n");
-     hint = "hint";
-     password = "password";
-     printk(KERN_WARNING "%s\n",buf);
-     printk(KERN_WARNING "hint: %s\n", hint);
-     printk(KERN_WARNING "password: %s\n", password);
-
-     insert_pair (&dev->pwd_vault, uid, hint, password);
-     dump_vault (&dev->pwd_vault, FORWARD);
-     //sscanf(buf, "%s %s", hint, password);
      password = strchr(buf, ' ');
      password++;
-     printk(KERN_WARNING "password: %s\n", password);
      hint = buf;
      char * tmp = password;
      tmp[-1] = '\0';
      insert_pair (&dev->pwd_vault, uid, hint, password);
-     dump_vault (&dev->pwd_vault, FORWARD);
-     insert_pair (&dev->pwd_vault, uid, "hint", "new");
-     dump_vault (&dev->pwd_vault, FORWARD);
 
    }
 
@@ -217,11 +209,12 @@ long hw4mod_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
     * "write" is reversed
     */
 
-    if(cmd == SCULL_IOCSQUANTUM){
-      if (! capable (CAP_SYS_ADMIN))
-          return -EPERM;
-      retval = __get_user(scull_quantum, (int __user *)arg);
-    }
+    // if(cmd == HW4MOD_IOCSKEY){
+    //   if (! capable (CAP_SYS_ADMIN))
+    //       return -EPERM;
+    //   retval = __get_user(scull_quantum, (int __user *)arg);
+      
+    // }
 
       /* Tell: arg is the value */
 
