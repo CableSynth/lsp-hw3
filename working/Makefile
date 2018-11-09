@@ -2,7 +2,7 @@ ifneq ($(KERNELRELEASE),)
 # call from kernel build system
 
 KCFLAGS="-Wno-format -Wno-declaration-after-statement"
-CCFLAGS="-std=c99"
+CCFLAGS="-std=c99 -DDEBUG"
 
 hw4mod-objs := hw4_mod.o pwd_vault.o
 

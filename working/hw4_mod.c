@@ -15,7 +15,6 @@
  * Modified by Keith Shomper, 10/27/2017 for use in CS3320
  *
  */
-#define _POSIX_C_SOURCE 200112L
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -29,7 +28,6 @@
 #include <linux/fcntl.h>   /* O_ACCMODE */
 #include <linux/seq_file.h>
 #include <linux/cdev.h>
-#include <linux/string.h>
 
 #include <linux/uaccess.h> /* needed for some reason*/
 #include <asm/uaccess.h>   /* copy_*_user */
@@ -152,29 +150,32 @@ ssize_t hw4mod_write(struct file *filp, const char __user *buf, size_t count,
 
    if (down_interruptible(&dev->sem)) return -ERESTARTSYS;
    
-   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data->fp;
    int uid = get_current_user()->uid.val;
    uid -= 999;
+   struct hpw_list *filePtr = dev->pwd_vault.uhpw_data[uid].fp;
+   
    char *hint, *password;
    
    if(strcmp(buf, "") == 0){
-     printk("<3> Empty string\n");
+     printk(KERN_WARNING "<3> Empty string\n");
      
+     dump_vault (&dev->pwd_vault, FORWARD);
+     delete_from_list(&dev->pwd_vault.uhpw_data->fp);
+     dump_vault (&dev->pwd_vault, FORWARD);
+
      //here we need to delete a pair and move fp
    }else {
-     printk("<3> Not Empty Buf\n");
+     printk(KERN_WARNING "<3> Not Empty Buf\n");
+     hint = "hint";
+     password = "password";
+     printk(KERN_WARNING "%s\n",buf);
+     printk(KERN_WARNING "hint: %s\n", hint);
+     printk(KERN_WARNING "password: %s\n", password);
 
-     hint = strtok_r(buf, " ");
-     if(hint){
-        printk("%s\n",buf);
-        password = strtok_r(NULL, " ");
-        printk("hint: %s\n", hint);
-
-        if(password){
-            printk("password: %s\n", password);
-        }
-
-     } 
+     insert_pair (&dev->pwd_vault, uid, hint, password);
+     dump_vault (&dev->pwd_vault, FORWARD);
+     insert_pair (&dev->pwd_vault, uid, "old", "new");
+     dump_vault (&dev->pwd_vault, FORWARD);
 
    }
 
